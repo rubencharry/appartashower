@@ -1,0 +1,674 @@
+---
+import { createServerClient } from '../lib/supabase';
+import GiftGrid from '../components/GiftGrid';
+import type { Gift } from '../lib/types';
+
+let initialGifts: Gift[] = [];
+
+try {
+  const supabase = createServerClient();
+  const { data } = await supabase
+    .from('gifts')
+    .select('*')
+    .order('created_at', { ascending: true });
+  initialGifts = data ?? [];
+} catch {
+  initialGifts = [];
+}
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lista de regalos · Appartashower</title>
+    <meta name="description" content="Lista de regalos para nuestro nuevo hogar" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style is:global>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      :root {
+        --purple: #8B5CF6;
+        --purple-light: #EDE9FE;
+        --purple-mid: #C4B5FD;
+        --purple-dark: #6D28D9;
+        --pink: #EC4899;
+        --pink-light: #FCE7F3;
+        --pink-mid: #F9A8D4;
+        --bg: #F7F3FF;
+        --white: #FFFFFF;
+        --dark: #1F2937;
+        --gray: #6B7280;
+        --gray-light: #F3F4F6;
+        --font-h: 'Poppins', sans-serif;
+        --font-b: 'Inter', sans-serif;
+        --radius: 20px;
+        --radius-sm: 12px;
+        --shadow: 0 4px 32px rgba(139, 92, 246, 0.10);
+        --shadow-hover: 0 8px 40px rgba(139, 92, 246, 0.18);
+      }
+
+      html { scroll-behavior: smooth; }
+
+      body {
+        font-family: var(--font-b);
+        background: var(--bg);
+        color: var(--dark);
+        min-height: 100vh;
+      }
+
+      /* ── HEADER ── */
+      .site-header {
+        background: var(--white);
+        padding: 1.25rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 16px rgba(139, 92, 246, 0.08);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      .site-logo {
+        font-family: var(--font-h);
+        font-weight: 800;
+        font-size: 1.3rem;
+        color: var(--purple);
+        letter-spacing: -0.5px;
+      }
+
+      .site-logo span { color: var(--pink); }
+
+      .site-header__tag {
+        font-family: var(--font-h);
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: var(--purple-light);
+        color: var(--purple-dark);
+        padding: 0.3rem 0.85rem;
+        border-radius: 999px;
+      }
+
+      /* ── HERO ── */
+      .hero {
+        position: relative;
+        overflow: hidden;
+        padding: 5rem 2rem 4rem;
+        text-align: center;
+      }
+
+      .hero__blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(60px);
+        opacity: 0.55;
+        pointer-events: none;
+      }
+
+      .hero__blob--purple {
+        width: 380px; height: 380px;
+        background: var(--purple-mid);
+        top: -120px; right: -80px;
+      }
+
+      .hero__blob--pink {
+        width: 300px; height: 300px;
+        background: var(--pink-mid);
+        bottom: -100px; left: -60px;
+      }
+
+      .hero__blob--sm {
+        width: 160px; height: 160px;
+        background: var(--purple-mid);
+        bottom: 40px; right: 15%;
+        opacity: 0.3;
+      }
+
+      .hero__content {
+        position: relative;
+        z-index: 1;
+        max-width: 640px;
+        margin: 0 auto;
+      }
+
+      .hero__eyebrow {
+        display: inline-block;
+        font-family: var(--font-h);
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--pink);
+        background: var(--pink-light);
+        padding: 0.35rem 1rem;
+        border-radius: 999px;
+        margin-bottom: 1.25rem;
+      }
+
+      .hero__title {
+        font-family: var(--font-h);
+        font-weight: 800;
+        font-size: clamp(2rem, 5vw, 3rem);
+        line-height: 1.15;
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+      }
+
+      .hero__title--accent { color: var(--purple); }
+
+      .hero__message {
+        font-size: 1rem;
+        line-height: 1.8;
+        color: var(--gray);
+        margin-top: 1.25rem;
+      }
+
+      .hero__message strong {
+        color: var(--dark);
+        font-weight: 600;
+      }
+
+      .hero__divider {
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--purple), var(--pink));
+        border-radius: 999px;
+        margin: 1.75rem auto 0;
+      }
+
+      /* ── MAIN ── */
+      .main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2.5rem 1.5rem 5rem;
+      }
+
+      .section-title {
+        font-family: var(--font-h);
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: var(--dark);
+        margin-bottom: 0.3rem;
+      }
+
+      .section-subtitle {
+        font-size: 0.85rem;
+        color: var(--gray);
+        margin-bottom: 2rem;
+      }
+
+      /* ── STATS ── */
+      .gift-stats {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+      }
+
+      .gift-stats__pill {
+        font-family: var(--font-h);
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 0.4rem 1rem;
+        border-radius: 999px;
+      }
+
+      .gift-stats__pill--available {
+        background: var(--purple-light);
+        color: var(--purple-dark);
+      }
+
+      .gift-stats__pill--claimed {
+        background: var(--pink-light);
+        color: var(--pink);
+      }
+
+      /* ── STORE FILTER ── */
+      .store-filter {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1.75rem;
+      }
+
+      .store-filter__chip {
+        font-family: var(--font-h);
+        font-size: 0.82rem;
+        font-weight: 500;
+        padding: 0.45rem 1.1rem;
+        border: 1.5px solid var(--purple-light);
+        border-radius: 999px;
+        background: var(--white);
+        color: var(--gray);
+        cursor: pointer;
+        transition: background 0.18s, color 0.18s, border-color 0.18s;
+        white-space: nowrap;
+      }
+
+      .store-filter__chip:hover {
+        border-color: var(--purple);
+        color: var(--purple);
+      }
+
+      .store-filter__chip--active {
+        background: var(--purple);
+        border-color: var(--purple);
+        color: var(--white);
+      }
+
+      .gift-empty {
+        text-align: center;
+        color: var(--gray);
+        font-size: 0.9rem;
+        padding: 3rem 0;
+      }
+
+      /* ── GIFT GRID ── */
+      .gift-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+      }
+
+      /* ── GIFT CARD ── */
+      .gift-card {
+        background: var(--white);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .gift-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-hover);
+      }
+
+      .gift-card--claimed { opacity: 0.78; }
+
+      .gift-card__image-wrap {
+        position: relative;
+        aspect-ratio: 4/3;
+        overflow: hidden;
+      }
+
+      .gift-card__image {
+        width: 100%; height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.35s ease;
+      }
+
+      .gift-card:hover .gift-card__image { transform: scale(1.04); }
+
+      .gift-card__image-link {
+        display: block;
+        width: 100%; height: 100%;
+      }
+
+      .gift-card__link-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(109, 40, 217, 0.72);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        color: var(--white);
+        font-family: var(--font-h);
+        font-size: 0.82rem;
+        font-weight: 600;
+        opacity: 0;
+        transition: opacity 0.22s ease;
+        pointer-events: none;
+      }
+
+      .gift-card__link-icon {
+        font-size: 1.6rem;
+        font-weight: 400;
+        line-height: 1;
+      }
+
+      .gift-card__image-link:hover .gift-card__link-overlay { opacity: 1; }
+
+      .gift-card__image-placeholder {
+        width: 100%; height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3.5rem;
+        background: linear-gradient(135deg, var(--purple-light) 0%, var(--pink-light) 100%);
+      }
+
+      .gift-card__badge {
+        position: absolute;
+        top: 12px; left: 12px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-family: var(--font-h);
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 0.3rem 0.75rem;
+        border-radius: 999px;
+        letter-spacing: 0.3px;
+      }
+
+      .gift-card__badge--claimed { background: var(--purple); color: var(--white); }
+      .gift-card__badge--available { background: var(--pink); color: var(--white); }
+
+      .gift-card__body {
+        padding: 1.25rem 1.25rem 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        flex: 1;
+      }
+
+      .gift-card__meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+      }
+
+      .gift-card__category {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-family: var(--font-h);
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--purple-dark);
+        background: var(--purple-light);
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+      }
+
+      .gift-card__location {
+        font-family: var(--font-h);
+        font-size: 0.68rem;
+        font-weight: 500;
+        color: var(--gray);
+      }
+
+      .gift-card__name {
+        font-family: var(--font-h);
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: var(--dark);
+        line-height: 1.3;
+      }
+
+      .gift-card__footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-top: auto;
+        padding-top: 1rem;
+        border-top: 1px solid var(--gray-light);
+      }
+
+      .gift-card__price-wrap {
+        display: flex;
+        align-items: baseline;
+        gap: 0.4rem;
+      }
+
+      .gift-card__price {
+        font-family: var(--font-h);
+        font-weight: 800;
+        font-size: 1.2rem;
+        color: var(--dark);
+      }
+
+      .gift-card__quantity {
+        font-family: var(--font-h);
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--white);
+        background: var(--purple);
+        padding: 0.15rem 0.5rem;
+        border-radius: 999px;
+      }
+
+      .gift-card__btn {
+        font-family: var(--font-h);
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding: 0.55rem 1.25rem;
+        background: linear-gradient(135deg, var(--purple) 0%, var(--pink) 100%);
+        color: var(--white);
+        border: none;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: opacity 0.2s, transform 0.2s;
+        white-space: nowrap;
+      }
+
+      .gift-card__btn:hover { opacity: 0.88; transform: scale(1.03); }
+
+      .gift-card__btn-unclaim {
+        font-family: var(--font-h);
+        font-weight: 500;
+        font-size: 0.78rem;
+        padding: 0.45rem 0.9rem;
+        background: transparent;
+        color: var(--gray);
+        border: 1.5px solid var(--gray-light);
+        border-radius: 999px;
+        cursor: pointer;
+        transition: color 0.2s, border-color 0.2s;
+        white-space: nowrap;
+      }
+
+      .gift-card__btn-unclaim:hover:not(:disabled) {
+        color: #EF4444;
+        border-color: #FECACA;
+      }
+
+      .gift-card__btn-unclaim:disabled { opacity: 0.5; cursor: not-allowed; }
+
+      /* ── MODAL ── */
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(31, 41, 55, 0.55);
+        backdrop-filter: blur(6px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        padding: 1rem;
+        animation: fadeIn 0.2s ease;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      .modal-box {
+        background: var(--white);
+        border-radius: var(--radius);
+        padding: 2.5rem 2rem;
+        width: 100%;
+        max-width: 420px;
+        position: relative;
+        text-align: center;
+        animation: slideUp 0.25s ease;
+        box-shadow: 0 20px 60px rgba(139, 92, 246, 0.2);
+      }
+
+      @keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .modal-close {
+        position: absolute;
+        top: 1rem; right: 1rem;
+        background: var(--gray-light);
+        border: none;
+        width: 32px; height: 32px;
+        border-radius: 50%;
+        font-size: 0.75rem;
+        cursor: pointer;
+        color: var(--gray);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.15s;
+      }
+
+      .modal-close:hover { background: var(--purple-light); color: var(--purple); }
+
+      .modal-icon { font-size: 3rem; margin-bottom: 0.75rem; }
+
+      .modal-title {
+        font-family: var(--font-h);
+        font-weight: 700;
+        font-size: 1.35rem;
+        color: var(--dark);
+        margin-bottom: 0.4rem;
+      }
+
+      .modal-subtitle {
+        font-size: 0.9rem;
+        color: var(--gray);
+        margin-bottom: 1.5rem;
+      }
+
+      .modal-subtitle strong { color: var(--purple); font-weight: 600; }
+
+      .modal-form { display: flex; flex-direction: column; gap: 0.75rem; text-align: left; }
+
+      .modal-label {
+        font-family: var(--font-h);
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--dark);
+      }
+
+      .modal-input {
+        font-family: var(--font-b);
+        font-size: 0.95rem;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--gray-light);
+        border-radius: var(--radius-sm);
+        outline: none;
+        transition: border-color 0.2s;
+        color: var(--dark);
+        width: 100%;
+      }
+
+      .modal-input:focus { border-color: var(--purple); }
+
+      .modal-error {
+        font-size: 0.82rem;
+        color: #EF4444;
+        background: #FEF2F2;
+        padding: 0.5rem 0.75rem;
+        border-radius: var(--radius-sm);
+      }
+
+      .modal-btn {
+        font-family: var(--font-h);
+        font-weight: 700;
+        font-size: 0.95rem;
+        padding: 0.85rem;
+        background: linear-gradient(135deg, var(--purple) 0%, var(--pink) 100%);
+        color: var(--white);
+        border: none;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: opacity 0.2s, transform 0.2s;
+        margin-top: 0.25rem;
+      }
+
+      .modal-btn:hover:not(:disabled) { opacity: 0.9; transform: scale(1.01); }
+      .modal-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+      /* ── FOOTER ── */
+      .site-footer {
+        text-align: center;
+        padding: 2.5rem 1rem;
+        font-size: 0.82rem;
+        color: var(--gray);
+        border-top: 1px solid var(--purple-light);
+      }
+
+      /* ── RESPONSIVE ── */
+      @media (max-width: 600px) {
+        .hero { padding: 3.5rem 1.25rem 3rem; }
+        .gift-grid { grid-template-columns: 1fr; }
+        .site-header { padding: 1rem 1.25rem; }
+        .main { padding: 2rem 1rem 4rem; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="site-header">
+      <span class="site-logo">Aparta<span>shower</span></span>
+      <span class="site-header__tag">Lista de regalos 🎁</span>
+    </header>
+
+    <section class="hero">
+      <div class="hero__blob hero__blob--purple"></div>
+      <div class="hero__blob hero__blob--pink"></div>
+      <div class="hero__blob hero__blob--sm"></div>
+
+      <div class="hero__content">
+        <span class="hero__eyebrow">✨ Nuevo hogar, nueva etapa</span>
+
+        <h1 class="hero__title">
+          Gracias por ser parte<br />
+          de este <span class="hero__title--accent">nuevo comienzo</span>
+        </h1>
+
+        <p class="hero__message">
+          Su presencia y cariño son el regalo más grande que podríamos recibir.
+          <strong> Cada uno de ustedes hace este lugar especial.</strong>
+          <br /><br />
+          Si quieren contribuir a hacer nuestro nuevo hogar más acogedor,
+          aquí les compartimos nuestra lista de deseos que con mucho amor construimos,
+          visitamos cada uno de los lugares para facilitarles la elección.
+          Solo haz clic en <strong>"Apartar"</strong> para que nadie más lo regale.
+        </p>
+
+        <div class="hero__divider"></div>
+      </div>
+    </section>
+
+    <main class="main">
+      <h2 class="section-title">Nuestra lista de deseos</h2>
+      <p class="section-subtitle">
+        Actualizada en tiempo real · los regalos apartados aparecen marcados automáticamente
+      </p>
+
+      <GiftGrid
+        client:load
+        initialGifts={initialGifts}
+        supabaseUrl={import.meta.env.PUBLIC_SUPABASE_URL}
+        supabaseAnonKey={import.meta.env.PUBLIC_SUPABASE_ANON_KEY}
+      />
+    </main>
+
+    <footer class="site-footer">
+      <p>Hecho con ❤️ para nuestro nuevo hogar · 2026</p>
+    </footer>
+  </body>
+</html>
