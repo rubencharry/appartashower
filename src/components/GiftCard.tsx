@@ -59,40 +59,34 @@ export default function GiftCard({ gift, onUpdate }: Props) {
     }
   }
 
-  const imageWrap = (
-    <div className="gift-card__image-wrap">
-      <GiftImage gift={gift} />
-
-      {gift.link && (
-        <div className="gift-card__link-overlay">
-          <span className="gift-card__link-icon">↗</span>
-          <span>Ver referencia</span>
-        </div>
-      )}
-
-      {isClaimed ? (
-        <div className="gift-card__badge gift-card__badge--claimed">
-          <span>✓</span>
-          <span>Apartado</span>
-        </div>
-      ) : (
-        <div className="gift-card__badge gift-card__badge--available">
-          <span>Disponible</span>
-        </div>
-      )}
-    </div>
-  );
-
   return (
     <>
       <div className={`gift-card ${isClaimed ? 'gift-card--claimed' : ''}`}>
-        {gift.link ? (
-          <a href={gift.link} target="_blank" rel="noopener noreferrer" className="gift-card__image-link">
-            {imageWrap}
-          </a>
-        ) : (
-          imageWrap
-        )}
+        <div className="gift-card__image-wrap">
+          <GiftImage gift={gift} />
+
+          {isClaimed ? (
+            <div className="gift-card__badge gift-card__badge--claimed">
+              <span>✓</span>
+              <span>Apartado</span>
+            </div>
+          ) : (
+            <div className="gift-card__badge gift-card__badge--available">
+              <span>Disponible</span>
+            </div>
+          )}
+
+          {gift.link && (
+            <a
+              href={gift.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="gift-card__ref-btn"
+            >
+              ↗ Ver referencia
+            </a>
+          )}
+        </div>
 
         <div className="gift-card__body">
           <div className="gift-card__meta">
@@ -123,7 +117,7 @@ export default function GiftCard({ gift, onUpdate }: Props) {
                 onClick={handleUnclaim}
                 disabled={unclaiming}
               >
-                {unclaiming ? 'Liberando...' : 'Cancelar reserva'}
+                {unclaiming ? '...' : 'Cancelar'}
               </button>
             ) : (
               <button
