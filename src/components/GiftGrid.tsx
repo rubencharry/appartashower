@@ -25,6 +25,16 @@ export default function GiftGrid({ initialGifts, supabaseUrl, supabaseAnonKey }:
     }
   }, []);
 
+  // Si el SSR llegó vacío (env vars mal en Vercel), carga desde el cliente
+  useEffect(() => {
+    if (initialGifts.length === 0) {
+      fetch('/api/gifts')
+        .then((r) => r.json())
+        .then((data) => { if (Array.isArray(data) && data.length > 0) setGifts(data); })
+        .catch((e) => console.error('[GiftGrid fallback]', e));
+    }
+  }, []);
+
   useEffect(() => {
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 

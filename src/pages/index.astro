@@ -4,16 +4,18 @@ import GiftGrid from '../components/GiftGrid';
 import type { Gift } from '../lib/types';
 
 let initialGifts: Gift[] = [];
+let ssrError = '';
 
 try {
   const supabase = createServerClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('gifts')
     .select('*')
     .order('created_at', { ascending: true });
+  if (error) ssrError = error.message;
   initialGifts = data ?? [];
-} catch {
-  initialGifts = [];
+} catch (e) {
+  ssrError = e instanceof Error ? e.message : 'Unknown error';
 }
 ---
 
@@ -666,6 +668,11 @@ try {
         Actualizada en tiempo real · los regalos apartados aparecen marcados automáticamente
       </p>
 
+      {ssrError && (
+        <script define:vars={{ ssrError }}>
+          console.error('[SSR Supabase error]', ssrError);
+        </script>
+      )}
       <GiftGrid
         client:load
         initialGifts={initialGifts}
