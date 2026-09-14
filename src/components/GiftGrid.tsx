@@ -15,6 +15,16 @@ export default function GiftGrid({ initialGifts, supabaseUrl, supabaseAnonKey }:
   const [gifts, setGifts] = useState<Gift[]>(initialGifts);
   const [activeStore, setActiveStore] = useState<Store | null>(null);
 
+  // Fallback: si el SSR llegó vacío, buscar desde el cliente
+  useEffect(() => {
+    if (initialGifts.length === 0) {
+      fetch('/api/gifts')
+        .then((r) => r.json())
+        .then((data) => { if (Array.isArray(data)) setGifts(data); })
+        .catch(() => {});
+    }
+  }, []);
+
   useEffect(() => {
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
