@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Roof -->
+  <polygon points="50,10 92,50 8,50" fill="#8B5CF6"/>
+  <!-- Wall -->
+  <rect x="16" y="50" width="68" height="42" rx="4" fill="#8B5CF6"/>
+  <!-- Door -->
+  <rect x="38" y="66" width="24" height="26" rx="4" fill="#F7F3FF"/>
+  <!-- Door knob -->
+  <circle cx="58" cy="80" r="2.5" fill="#EC4899"/>
+</svg>
