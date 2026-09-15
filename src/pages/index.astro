@@ -242,6 +242,7 @@ try {
         margin-bottom: 1.75rem;
       }
 
+
       .store-filter__chip {
         font-family: var(--font-h);
         font-size: 0.82rem;
@@ -262,9 +263,10 @@ try {
       }
 
       .store-filter__chip--active {
-        background: var(--purple);
+        background: var(--purple-light);
         border-color: var(--purple);
-        color: var(--white);
+        color: var(--purple-dark);
+        font-weight: 700;
       }
 
       .gift-empty {
@@ -608,6 +610,20 @@ try {
         .hero { padding: 3.5rem 1.25rem 3rem; }
         .site-header { padding: 1rem 1.25rem; }
         .main { padding: 2rem 0.75rem 4rem; }
+
+        .store-filter {
+          flex-wrap: nowrap;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+          padding-bottom: 4px;
+          margin-left: -0.75rem;
+          margin-right: -0.75rem;
+          padding-left: 0.75rem;
+          padding-right: 0.75rem;
+        }
+        .store-filter::-webkit-scrollbar { display: none; }
+        .store-filter__chip { flex-shrink: 0; }
 
         .gift-grid {
           grid-template-columns: repeat(2, 1fr);

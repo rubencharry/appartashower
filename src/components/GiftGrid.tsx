@@ -79,6 +79,7 @@ export default function GiftGrid({ initialGifts, supabaseUrl, supabaseAnonKey }:
         ))}
       </div>
 
+
       {visible.length === 0 ? (
         <p className="gift-empty">No hay regalos en este almacén todavía.</p>
       ) : (
