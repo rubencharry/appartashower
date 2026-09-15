@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { STORES } from '../lib/stores';
+import { CATEGORIES, CATEGORY_EMOJI } from '../lib/categories';
 import type { Gift } from '../lib/types';
 import type { Store } from '../lib/stores';
+import type { Category } from '../lib/categories';
 import GiftCard from './GiftCard';
 
 interface Props {
@@ -14,6 +16,7 @@ interface Props {
 export default function GiftGrid({ initialGifts, supabaseUrl, supabaseAnonKey }: Props) {
   const [gifts, setGifts] = useState<Gift[]>(initialGifts);
   const [activeStore, setActiveStore] = useState<Store | null>(null);
+  const [activeCategory, setActiveCategory] = useState<Category | null>(null);
 
   useEffect(() => {
     if (initialGifts.length === 0) {
@@ -47,7 +50,9 @@ export default function GiftGrid({ initialGifts, supabaseUrl, supabaseAnonKey }:
     setGifts((prev) => prev.map((g) => (g.id === updated.id ? updated : g)));
   }
 
-  const visible = activeStore ? gifts.filter((g) => g.location === activeStore) : gifts;
+  const visible = gifts
+    .filter((g) => !activeStore || g.location === activeStore)
+    .filter((g) => !activeCategory || g.category === activeCategory);
   const available = gifts.filter((g) => !g.claimed_by).length;
 
   return (
@@ -59,6 +64,24 @@ export default function GiftGrid({ initialGifts, supabaseUrl, supabaseAnonKey }:
         <span className="gift-stats__pill gift-stats__pill--claimed">
           {gifts.length - available} apartados
         </span>
+      </div>
+
+      <div className="store-filter">
+        <button
+          className={`store-filter__chip ${activeCategory === null ? 'store-filter__chip--active' : ''}`}
+          onClick={() => setActiveCategory(null)}
+        >
+          Todas
+        </button>
+        {CATEGORIES.map((cat) => (
+          <button
+            key={cat}
+            className={`store-filter__chip ${activeCategory === cat ? 'store-filter__chip--active' : ''}`}
+            onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
+          >
+            {CATEGORY_EMOJI[cat]} {cat}
+          </button>
+        ))}
       </div>
 
       <div className="store-filter">

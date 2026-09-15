@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Gift } from '../lib/types';
-import { CATEGORY_EMOJI } from '../lib/categories';
+import { CATEGORY_EMOJI, CATEGORY_CLASS } from '../lib/categories';
 import ClaimModal from './ClaimModal';
 
 interface Props {
@@ -44,6 +44,7 @@ export default function GiftCard({ gift, onUpdate }: Props) {
   const [unclaiming, setUnclaiming] = useState(false);
   const isClaimed = Boolean(gift.claimed_by);
   const emoji = gift.category ? CATEGORY_EMOJI[gift.category] : null;
+  const categoryClass = gift.category ? CATEGORY_CLASS[gift.category] : '';
 
   async function handleUnclaim() {
     setUnclaiming(true);
@@ -61,7 +62,7 @@ export default function GiftCard({ gift, onUpdate }: Props) {
 
   return (
     <>
-      <div className={`gift-card ${isClaimed ? 'gift-card--claimed' : ''}`}>
+      <div className={`gift-card ${isClaimed ? 'gift-card--claimed' : ''} ${categoryClass}`}>
         <div className="gift-card__image-wrap">
           <GiftImage gift={gift} />
 

@@ -23,3 +23,15 @@ export const CATEGORY_EMOJI: Record<Category, string> = {
   'Decoración':       '🖼️',
   'Electrodomésticos':'⚡',
 };
+
+export const CATEGORY_CLASS: Record<Category, string> = {
+  'Cocina':           'cat-cocina',
+  'Baño':             'cat-bano',
+  'Habitación':       'cat-habitacion',
+  'Sala':             'cat-sala',
+  'Herramientas':     'cat-herramientas',
+  'Limpieza':         'cat-limpieza',
+  'Entrada':          'cat-entrada',
+  'Decoración':       'cat-decoracion',
+  'Electrodomésticos':'cat-electrodomesticos',
+};
