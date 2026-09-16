@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Gift } from '../lib/types';
 import { CATEGORY_EMOJI, CATEGORY_CLASS } from '../lib/categories';
 import ClaimModal from './ClaimModal';
+import UnclaimModal from './UnclaimModal';
 
 interface Props {
   gift: Gift;
@@ -27,10 +28,16 @@ function EyeIcon() {
 
 export default function GiftCard({ gift, onUpdate }: Props) {
   const [showModal, setShowModal] = useState(false);
+  const [showUnclaimModal, setShowUnclaimModal] = useState(false);
   const [showLightbox, setShowLightbox] = useState(false);
   const [imgErrored, setImgErrored] = useState(false);
   const [unclaiming, setUnclaiming] = useState(false);
-  const isClaimed = Boolean(gift.claimed_by);
+
+  const claimed = gift.claimed_quantity ?? 0;
+  const available = gift.quantity - claimed;
+  const isClaimed = available <= 0;
+  const isPartial = claimed > 0 && available > 0;
+
   const emoji = gift.category ? CATEGORY_EMOJI[gift.category] : '🎁';
   const categoryEmoji = gift.category ? CATEGORY_EMOJI[gift.category] : null;
   const categoryClass = gift.category ? CATEGORY_CLASS[gift.category] : '';
@@ -91,6 +98,10 @@ export default function GiftCard({ gift, onUpdate }: Props) {
               <span>✓</span>
               <span>Apartado</span>
             </div>
+          ) : isPartial ? (
+            <div className="gift-card__badge gift-card__badge--partial">
+              <span>{available} {available === 1 ? 'restante' : 'restantes'}</span>
+            </div>
           ) : (
             <div className="gift-card__badge gift-card__badge--available">
               <span>Disponible</span>
@@ -130,26 +141,31 @@ export default function GiftCard({ gift, onUpdate }: Props) {
               <span className="gift-card__price-cu">c/u</span>
             </span>
 
-            {isClaimed ? (
-              <button
-                className="gift-card__btn-unclaim"
-                onClick={handleUnclaim}
-                disabled={unclaiming}
-              >
-                {unclaiming ? '...' : 'Cancelar'}
-              </button>
-            ) : (
-              <button
-                className="gift-card__btn"
-                onClick={() => setShowModal(true)}
-              >
-                Apartar
-              </button>
-            )}
+            <div className="gift-card__btn-group">
+              {claimed > 0 && (
+                <button
+                  className="gift-card__btn-unclaim"
+                  onClick={claimed > 1 ? () => setShowUnclaimModal(true) : handleUnclaim}
+                  disabled={unclaiming}
+                >
+                  {unclaiming ? '...' : 'Cancelar'}
+                </button>
+              )}
+              {available > 0 && (
+                <button
+                  className="gift-card__btn"
+                  onClick={() => setShowModal(true)}
+                >
+                  Apartar
+                </button>
+              )}
+            </div>
           </div>
 
           <p className="gift-card__units">
-            {gift.quantity} {gift.quantity === 1 ? 'unidad' : 'unidades'}
+            {isPartial
+              ? `${available} de ${gift.quantity} disponibles`
+              : `${gift.quantity} ${gift.quantity === 1 ? 'unidad' : 'unidades'}`}
           </p>
         </div>
       </div>
@@ -161,6 +177,17 @@ export default function GiftCard({ gift, onUpdate }: Props) {
           onClaimed={(updated) => {
             onUpdate(updated);
             setShowModal(false);
+          }}
+        />
+      )}
+
+      {showUnclaimModal && (
+        <UnclaimModal
+          gift={gift}
+          onClose={() => setShowUnclaimModal(false)}
+          onUnclaimed={(updated) => {
+            onUpdate(updated);
+            setShowUnclaimModal(false);
           }}
         />
       )}

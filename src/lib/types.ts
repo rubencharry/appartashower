@@ -10,6 +10,7 @@ export interface Gift {
   price: number;
   quantity: number;
   link: string | null;
+  claimed_quantity: number;
   claimed_by: string | null;
   claimed_at: string | null;
   created_at: string;

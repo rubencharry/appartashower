@@ -13,9 +13,27 @@ export const POST: APIRoute = async ({ request }) => {
 
   const supabase = createServerClient();
 
+  const { data: gift } = await supabase
+    .from('gifts')
+    .select('claimed_quantity')
+    .eq('id', body.giftId)
+    .single();
+
+  const currentClaimed = gift?.claimed_quantity ?? 0;
+  const cancelQuantity = Math.min(
+    currentClaimed,
+    Math.max(1, parseInt(body.cancelQuantity ?? String(currentClaimed), 10) || currentClaimed)
+  );
+  const newClaimed = Math.max(0, currentClaimed - cancelQuantity);
+
+  const update =
+    newClaimed <= 0
+      ? { claimed_quantity: 0, claimed_by: null, claimed_at: null }
+      : { claimed_quantity: newClaimed };
+
   const { data, error } = await supabase
     .from('gifts')
-    .update({ claimed_by: null, claimed_at: null })
+    .update(update)
     .eq('id', body.giftId)
     .select()
     .single();

@@ -8,7 +8,9 @@ interface Props {
 }
 
 export default function ClaimModal({ gift, onClose, onClaimed }: Props) {
+  const available = gift.quantity - (gift.claimed_quantity ?? 0);
   const [name, setName] = useState('');
+  const [claimQty, setClaimQty] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -23,7 +25,7 @@ export default function ClaimModal({ gift, onClose, onClaimed }: Props) {
       const res = await fetch('/api/claim', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ giftId: gift.id, claimedBy: name }),
+        body: JSON.stringify({ giftId: gift.id, claimedBy: name, claimQuantity: claimQty }),
       });
 
       const data = await res.json();
@@ -41,6 +43,12 @@ export default function ClaimModal({ gift, onClose, onClaimed }: Props) {
     }
   }
 
+  const btnLabel = loading
+    ? 'Guardando...'
+    : available > 1
+    ? `Apartar ${claimQty} ${claimQty === 1 ? 'unidad' : 'unidades'}`
+    : 'Apartar regalo';
+
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-box" onClick={(e) => e.stopPropagation()}>
@@ -53,6 +61,32 @@ export default function ClaimModal({ gift, onClose, onClaimed }: Props) {
         </p>
 
         <form onSubmit={handleSubmit} className="modal-form">
+          {available > 1 && (
+            <div className="modal-qty">
+              <label className="modal-label">¿Cuántas unidades?</label>
+              <div className="modal-qty__controls">
+                <button
+                  type="button"
+                  className="modal-qty__btn"
+                  onClick={() => setClaimQty((q) => Math.max(1, q - 1))}
+                  disabled={claimQty <= 1}
+                >
+                  −
+                </button>
+                <span className="modal-qty__value">{claimQty}</span>
+                <button
+                  type="button"
+                  className="modal-qty__btn"
+                  onClick={() => setClaimQty((q) => Math.min(available, q + 1))}
+                  disabled={claimQty >= available}
+                >
+                  +
+                </button>
+              </div>
+              <p className="modal-qty__hint">de {available} disponibles</p>
+            </div>
+          )}
+
           <label htmlFor="claim-name" className="modal-label">
             ¿Cuál es tu nombre?
           </label>
@@ -73,7 +107,7 @@ export default function ClaimModal({ gift, onClose, onClaimed }: Props) {
             disabled={loading || !name.trim()}
             className="modal-btn"
           >
-            {loading ? 'Guardando...' : 'Apartar regalo'}
+            {btnLabel}
           </button>
         </form>
       </div>

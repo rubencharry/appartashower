@@ -409,6 +409,7 @@ try {
 
       .gift-card__badge--claimed { background: var(--purple); color: var(--white); }
       .gift-card__badge--available { background: var(--pink); color: var(--white); }
+      .gift-card__badge--partial { background: #F59E0B; color: var(--white); }
 
       .gift-card__body {
         padding: 1.25rem 1.25rem 1.5rem;
@@ -560,6 +561,12 @@ try {
       }
 
       .gift-card__btn-unclaim:disabled { opacity: 0.5; cursor: not-allowed; }
+
+      .gift-card__btn-group {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
 
       /* ── EYE BUTTON ── */
       .gift-card__eye-btn {
@@ -752,6 +759,55 @@ try {
 
       .modal-btn:hover:not(:disabled) { opacity: 0.9; transform: scale(1.01); }
       .modal-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+      .modal-btn--danger {
+        background: linear-gradient(135deg, #EF4444 0%, #F97316 100%);
+      }
+
+      .modal-qty { display: flex; flex-direction: column; gap: 0.4rem; align-items: center; text-align: center; }
+      .modal-qty .modal-label { width: 100%; text-align: left; }
+
+      .modal-qty__controls {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: var(--gray-light);
+        border-radius: var(--radius-sm);
+        padding: 0.5rem 0.75rem;
+      }
+
+      .modal-qty__btn {
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        border: none;
+        background: var(--white);
+        color: var(--purple-dark);
+        font-size: 1.2rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.15s, color 0.15s;
+        flex-shrink: 0;
+      }
+
+      .modal-qty__btn:not(:disabled):hover { background: var(--purple-light); color: var(--purple); }
+      .modal-qty__btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+      .modal-qty__value {
+        font-family: var(--font-h);
+        font-weight: 700;
+        font-size: 1.6rem;
+        color: var(--dark);
+        min-width: 2.5rem;
+        text-align: center;
+      }
+
+      .modal-qty__hint {
+        font-size: 0.78rem;
+        color: var(--gray);
+      }
 
       /* ── FOOTER ── */
       .site-footer {

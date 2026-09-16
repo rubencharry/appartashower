@@ -53,7 +53,7 @@ export default function GiftGrid({ initialGifts, supabaseUrl, supabaseAnonKey }:
   const visible = gifts
     .filter((g) => !activeStore || g.location === activeStore)
     .filter((g) => !activeCategory || g.category === activeCategory);
-  const available = gifts.filter((g) => !g.claimed_by).length;
+  const available = gifts.filter((g) => (g.quantity - (g.claimed_quantity ?? 0)) > 0).length;
 
   return (
     <div>
