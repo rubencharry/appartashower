@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Gift } from '../lib/types';
 import { CATEGORY_EMOJI, CATEGORY_CLASS } from '../lib/categories';
 import ClaimModal from './ClaimModal';
@@ -16,35 +16,33 @@ function formatPrice(price: number) {
   }).format(price);
 }
 
-function GiftImage({ gift }: { gift: Gift }) {
-  const [errored, setErrored] = useState(false);
-  const emoji = gift.category ? CATEGORY_EMOJI[gift.category] : '🎁';
-
-  if (errored) {
-    return (
-      <div className="gift-card__image-placeholder">
-        <span>{emoji}</span>
-      </div>
-    );
-  }
-
+function EyeIcon() {
   return (
-    <img
-      src={`/img/${gift.code}.png`}
-      alt={gift.name}
-      className="gift-card__image"
-      loading="lazy"
-      onError={() => setErrored(true)}
-    />
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+      <circle cx="12" cy="12" r="3"/>
+    </svg>
   );
 }
 
 export default function GiftCard({ gift, onUpdate }: Props) {
   const [showModal, setShowModal] = useState(false);
+  const [showLightbox, setShowLightbox] = useState(false);
+  const [imgErrored, setImgErrored] = useState(false);
   const [unclaiming, setUnclaiming] = useState(false);
   const isClaimed = Boolean(gift.claimed_by);
-  const emoji = gift.category ? CATEGORY_EMOJI[gift.category] : null;
+  const emoji = gift.category ? CATEGORY_EMOJI[gift.category] : '🎁';
+  const categoryEmoji = gift.category ? CATEGORY_EMOJI[gift.category] : null;
   const categoryClass = gift.category ? CATEGORY_CLASS[gift.category] : '';
+
+  useEffect(() => {
+    if (!showLightbox) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setShowLightbox(false);
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showLightbox]);
 
   async function handleUnclaim() {
     setUnclaiming(true);
@@ -64,7 +62,29 @@ export default function GiftCard({ gift, onUpdate }: Props) {
     <>
       <div className={`gift-card ${isClaimed ? 'gift-card--claimed' : ''} ${categoryClass}`}>
         <div className="gift-card__image-wrap">
-          <GiftImage gift={gift} />
+          {imgErrored ? (
+            <div className="gift-card__image-placeholder">
+              <span>{emoji}</span>
+            </div>
+          ) : (
+            <img
+              src={`/img/${gift.code}.webp`}
+              alt={gift.name}
+              className="gift-card__image"
+              loading="lazy"
+              onError={() => setImgErrored(true)}
+            />
+          )}
+
+          {!imgErrored && (
+            <button
+              className="gift-card__eye-btn"
+              onClick={() => setShowLightbox(true)}
+              aria-label="Ver imagen completa"
+            >
+              <EyeIcon />
+            </button>
+          )}
 
           {isClaimed ? (
             <div className="gift-card__badge gift-card__badge--claimed">
@@ -91,9 +111,9 @@ export default function GiftCard({ gift, onUpdate }: Props) {
 
         <div className="gift-card__body">
           <div className="gift-card__meta">
-            {emoji && gift.category && (
+            {categoryEmoji && gift.category && (
               <span className="gift-card__category">
-                <span>{emoji}</span>
+                <span>{categoryEmoji}</span>
                 <span>{gift.category}</span>
               </span>
             )}
@@ -105,12 +125,10 @@ export default function GiftCard({ gift, onUpdate }: Props) {
           <h3 className="gift-card__name">{gift.name}</h3>
 
           <div className="gift-card__footer">
-            <div className="gift-card__price-wrap">
-              <span className="gift-card__price">{formatPrice(gift.price)}</span>
-              {gift.quantity > 1 && (
-                <span className="gift-card__quantity">× {gift.quantity}</span>
-              )}
-            </div>
+            <span className="gift-card__price">
+              {formatPrice(gift.price)}
+              <span className="gift-card__price-cu">c/u</span>
+            </span>
 
             {isClaimed ? (
               <button
@@ -129,6 +147,10 @@ export default function GiftCard({ gift, onUpdate }: Props) {
               </button>
             )}
           </div>
+
+          <p className="gift-card__units">
+            {gift.quantity} {gift.quantity === 1 ? 'unidad' : 'unidades'}
+          </p>
         </div>
       </div>
 
@@ -141,6 +163,24 @@ export default function GiftCard({ gift, onUpdate }: Props) {
             setShowModal(false);
           }}
         />
+      )}
+
+      {showLightbox && (
+        <div className="lightbox-backdrop" onClick={() => setShowLightbox(false)}>
+          <button
+            className="lightbox-close"
+            onClick={() => setShowLightbox(false)}
+            aria-label="Cerrar"
+          >
+            ✕
+          </button>
+          <img
+            src={`/img/${gift.code}.webp`}
+            alt={gift.name}
+            className="lightbox-img"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
       )}
     </>
   );
