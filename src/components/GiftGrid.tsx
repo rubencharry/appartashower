@@ -17,6 +17,7 @@ export default function GiftGrid({ initialGifts, supabaseUrl, supabaseAnonKey }:
   const [gifts, setGifts] = useState<Gift[]>(initialGifts);
   const [activeStore, setActiveStore] = useState<Store | null>(null);
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
+  const [activeStatus, setActiveStatus] = useState<'available' | 'claimed' | null>(null);
 
   useEffect(() => {
     if (initialGifts.length === 0) {
@@ -52,18 +53,29 @@ export default function GiftGrid({ initialGifts, supabaseUrl, supabaseAnonKey }:
 
   const visible = gifts
     .filter((g) => !activeStore || g.location === activeStore)
-    .filter((g) => !activeCategory || g.category === activeCategory);
+    .filter((g) => !activeCategory || g.category === activeCategory)
+    .filter((g) => {
+      if (!activeStatus) return true;
+      const isAvailable = (g.quantity - (g.claimed_quantity ?? 0)) > 0;
+      return activeStatus === 'available' ? isAvailable : !isAvailable;
+    });
   const available = gifts.filter((g) => (g.quantity - (g.claimed_quantity ?? 0)) > 0).length;
 
   return (
     <div>
       <div className="gift-stats">
-        <span className="gift-stats__pill gift-stats__pill--available">
+        <button
+          className={`gift-stats__pill gift-stats__pill--available ${activeStatus === 'available' ? 'gift-stats__pill--active' : ''}`}
+          onClick={() => setActiveStatus(activeStatus === 'available' ? null : 'available')}
+        >
           {available} disponibles
-        </span>
-        <span className="gift-stats__pill gift-stats__pill--claimed">
+        </button>
+        <button
+          className={`gift-stats__pill gift-stats__pill--claimed ${activeStatus === 'claimed' ? 'gift-stats__pill--active' : ''}`}
+          onClick={() => setActiveStatus(activeStatus === 'claimed' ? null : 'claimed')}
+        >
           {gifts.length - available} apartados
-        </span>
+        </button>
       </div>
 
       <div className="store-filter">

@@ -346,6 +346,10 @@ try {
         font-weight: 600;
         padding: 0.4rem 1rem;
         border-radius: 999px;
+        border: none;
+        cursor: pointer;
+        transition: opacity 0.15s, outline 0.15s;
+        outline: 2px solid transparent;
       }
 
       .gift-stats__pill--available {
@@ -353,9 +357,17 @@ try {
         color: var(--purple-dark);
       }
 
+      .gift-stats__pill--available.gift-stats__pill--active {
+        outline-color: var(--purple-dark);
+      }
+
       .gift-stats__pill--claimed {
         background: var(--pink-light);
         color: var(--pink);
+      }
+
+      .gift-stats__pill--claimed.gift-stats__pill--active {
+        outline-color: var(--pink);
       }
 
       /* ── STORE FILTER ── */
