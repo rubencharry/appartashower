@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import type { Gift } from '../lib/types';
 import { CATEGORY_EMOJI, CATEGORY_CLASS } from '../lib/categories';
 import ClaimModal from './ClaimModal';
-import UnclaimModal from './UnclaimModal';
 
 interface Props {
   gift: Gift;
@@ -28,10 +27,8 @@ function EyeIcon() {
 
 export default function GiftCard({ gift, onUpdate }: Props) {
   const [showModal, setShowModal] = useState(false);
-  const [showUnclaimModal, setShowUnclaimModal] = useState(false);
   const [showLightbox, setShowLightbox] = useState(false);
   const [imgErrored, setImgErrored] = useState(false);
-  const [unclaiming, setUnclaiming] = useState(false);
 
   const claimed = gift.claimed_quantity ?? 0;
   const available = gift.quantity - claimed;
@@ -50,20 +47,6 @@ export default function GiftCard({ gift, onUpdate }: Props) {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [showLightbox]);
-
-  async function handleUnclaim() {
-    setUnclaiming(true);
-    try {
-      const res = await fetch('/api/unclaim', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ giftId: gift.id }),
-      });
-      if (res.ok) onUpdate(await res.json());
-    } finally {
-      setUnclaiming(false);
-    }
-  }
 
   return (
     <>
@@ -142,15 +125,6 @@ export default function GiftCard({ gift, onUpdate }: Props) {
             </span>
 
             <div className="gift-card__btn-group">
-              {claimed > 0 && (
-                <button
-                  className="gift-card__btn-unclaim"
-                  onClick={claimed > 1 ? () => setShowUnclaimModal(true) : handleUnclaim}
-                  disabled={unclaiming}
-                >
-                  {unclaiming ? '...' : 'Cancelar'}
-                </button>
-              )}
               {available > 0 && (
                 <button
                   className="gift-card__btn"
@@ -177,17 +151,6 @@ export default function GiftCard({ gift, onUpdate }: Props) {
           onClaimed={(updated) => {
             onUpdate(updated);
             setShowModal(false);
-          }}
-        />
-      )}
-
-      {showUnclaimModal && (
-        <UnclaimModal
-          gift={gift}
-          onClose={() => setShowUnclaimModal(false)}
-          onUnclaimed={(updated) => {
-            onUpdate(updated);
-            setShowUnclaimModal(false);
           }}
         />
       )}
