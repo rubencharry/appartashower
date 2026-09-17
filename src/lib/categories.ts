@@ -8,6 +8,7 @@ export const CATEGORIES = [
   'Entrada',
   'Decoración',
   'Electrodomésticos',
+  'Navidad',
 ] as const;
 
 export type Category = typeof CATEGORIES[number];
@@ -22,6 +23,7 @@ export const CATEGORY_EMOJI: Record<Category, string> = {
   'Entrada':          '🚪',
   'Decoración':       '🖼️',
   'Electrodomésticos':'⚡',
+  'Navidad':          '🎄',
 };
 
 export const CATEGORY_CLASS: Record<Category, string> = {
@@ -34,4 +36,5 @@ export const CATEGORY_CLASS: Record<Category, string> = {
   'Entrada':          'cat-entrada',
   'Decoración':       'cat-decoracion',
   'Electrodomésticos':'cat-electrodomesticos',
+  'Navidad':          'cat-navidad',
 };
